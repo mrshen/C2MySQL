@@ -13,36 +13,33 @@ MyDB::MyDB()
 	
 	if (NULL == mysql_init(&(this->connection)))
 	{
-		cout << "Error: " << mysql_error(&(this->connection));
+		cout << "Error: " << mysql_error(&(this->connection)) << endl;
 		exit(1);
 	}
 
-	cout << "MyDB() is being called." << endl;
+	cout << "====================MyDB() is being called.====================" << endl << endl;
 }
 
-MyDB::MyDB(string _dbName)
+MyDB::MyDB(string _dbName):MyDB()
 {
-	MyDB();
 	this->dbName = _dbName;
 }
 
-MyDB::MyDB(string _host, string _user, string _psw, string _dbName)
+MyDB::MyDB(string _host, string _user, string _psw, string _dbName):MyDB(_dbName)
 {
-	MyDB();
 	this->host = _host;
 	this->user = _user;
 	this->psw = _psw;
-	this->dbName = _dbName;
 }
 
 MyDB::~MyDB()
 {
-	if (NULL != &connection)
+	if (NULL != &(this->connection))
 	{
 		mysql_close(&(this->connection));
 	}
 
-	cout << "~MyDB() is being called." << endl;
+	cout << endl << "====================~MyDB() is being called.====================" << endl;
 }
 
 bool MyDB::initDB()
@@ -58,8 +55,8 @@ bool MyDB::initDB()
 		NULL,
 		0))
 	{
-		cout << "Error: " << mysql_error(&(this->connection));
-		exit(1);
+		cout << "Error: " << mysql_error(&(this->connection)) << endl;
+		return false;
 	}
 
 	return true;
@@ -68,11 +65,15 @@ bool MyDB::initDB()
 bool MyDB::showAllSQL()
 {
 	string sql = "select * from pet";
+	return selectSQL(sql);
+}
 
+bool MyDB::selectSQL(string sql)
+{
 	if (mysql_query(&(this->connection), sql.c_str()))
 	{
-		cout << "Error: " << mysql_error(&(this->connection));
-		exit(1);
+		cout << "Error: " << mysql_error(&(this->connection)) << endl;
+		return false;
 	}
 	else
 	{
@@ -94,17 +95,11 @@ bool MyDB::showAllSQL()
 		cout << endl;
 
 		// 逐行打印数据
-		this->row = mysql_fetch_row(this->result);
-		while (this->row != NULL)
+		while ((this->row = mysql_fetch_row(this->result)))
 		{
-			for (size_t i = 0; i < fieldsNum; ++i) {
-				if (this->row[i] == NULL)
-					cout << "NULL\t";
-				else
-					cout << this->row[i] << '\t';
-			}
+			for (size_t i = 0; i < fieldsNum; ++i)
+				cout << (this->row[i] ? this->row[i] : "NULL") << '\t';
 			cout << endl;
-			this->row = mysql_fetch_row(this->result);
 		}
 		cout << "total: " << rowsNum << " rows." << endl;
 
@@ -113,4 +108,76 @@ bool MyDB::showAllSQL()
 	}
 
 	return true;
+}
+
+bool MyDB::executeSQL(string opType, string sql)
+{
+	if (mysql_query(&(this->connection), sql.c_str()))
+	{
+		cout << "Error: " << mysql_error(&(this->connection)) << endl;
+		// exit(1);
+		return false;
+	}
+	else
+	{
+		if (!mysql_field_count(&(this->connection)))
+		{
+			cout << "[" << opType << "] affected: " << mysql_affected_rows(&(this->connection)) << " rows." << endl;
+			return /*showAllSQL()*/true;
+		}
+		else
+		{
+			cout << "you execute a SELECT.." << endl;
+			return false;
+		}
+	}
+}
+
+void MyDB::updateSQL(string sql)
+{
+	if (executeSQL("UPDATE", sql)) {
+		cout << "update done.." << endl;
+	}
+}
+
+void MyDB::deleteSQL(string sql)
+{
+	if (executeSQL("DELETE", sql)) {
+		cout << "delete done.." << endl;
+	}
+}
+
+string MyDB::insertHelper()
+{
+	string name, owner, species, sex, birth, death;
+	cout << "name: ";
+	cin >> name;
+	cout << "owner: ";
+	cin >> owner;
+	cout << "species: ";
+	cin >> species;
+	cout << "sex (f/m): ";
+	cin >> sex;
+	cout << "birth (YYYY-MM-DD): ";
+	cin >> birth;
+	cout << "death (YYYY-MM-DD): ";
+	cin >> death;
+
+	string sql = "INSERT INTO pet(name, owner, species, sex, birth, death) VALUES('"
+		+ name + "', '"
+		+ owner + "', '"
+		+ species + "', '"
+		+ sex + "', '"
+		+ birth + "', '"
+		+ death + "')";
+	return sql;
+}
+
+void MyDB::insertSQL()
+{
+	string sql = insertHelper();
+	if (executeSQL("INSERT", sql))
+	{
+		cout << "insert done.." << endl;
+	}
 }

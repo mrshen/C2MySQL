@@ -22,10 +22,15 @@ public:
 	bool initDB();
 	// 数据库sql执行函数
 	bool showAllSQL();
-	//bool selectSQL(string sql);
-	//bool updateSQL(string sql);
-	//bool deleteSQL(string sql);
-	//bool insertSQL(string sql);
+	
+	bool selectSQL(string sql);
+	void updateSQL(string sql);
+	void deleteSQL(string sql);
+	void insertSQL();
+
+protected:
+	bool executeSQL(string opType, string sql);
+	string insertHelper();
 
 private:
 	// mysql连接
