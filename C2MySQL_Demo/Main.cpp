@@ -24,15 +24,19 @@ int main()
 				db.showAllSQL();
 				break;
 			case 2:
-				sql = "SELECT name, owner, species FROM pet";
+				cout << "select sql> ";
+				getchar();
+				getline(cin, sql);
 				db.selectSQL(sql);
 				break;
 			case 3:
-				sql = "UPDATE pet SET sex='f' WHERE name='Buffy' AND owner='Harold'";
+				getchar();
+				getline(cin, sql);
 				db.updateSQL(sql);
 				break;
 			case 4:
-				sql = "DELETE FROM pet WHERE name='d'";
+				getchar();
+				getline(cin, sql);
 				db.deleteSQL(sql);
 				break;
 			case 5:
