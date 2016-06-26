@@ -1,8 +1,10 @@
 #include "c2mysql.h"
 #include <iostream>
-#include <cstdlib>
 
 using namespace std;
+
+// 是否启动重连设置
+#define ENABLE_RECONNECT 1
 
 MyDB::MyDB()
 {
@@ -59,6 +61,15 @@ bool MyDB::initDB()
 		return false;
 	}
 
+#if ENABLE_RECONNECT
+	// 设置自动重连选项
+	char val = 1;
+	if (mysql_options(&(this->connection), MYSQL_OPT_RECONNECT, (const char*)&val))
+	{
+		cout << "Error: set RECONNECT failure." << endl;
+	}
+#endif // ENABLE_RECONNECT
+
 	return true;
 }
 
@@ -70,6 +81,8 @@ bool MyDB::showAllSQL()
 
 bool MyDB::selectSQL(string sql)
 {
+	// 调用mysql_query前最好先mysql_ping一下，以防断掉的连接重连回来
+	mysql_ping(&(this->connection));
 	if (mysql_query(&(this->connection), sql.c_str()))
 	{
 		cout << "Error: " << mysql_error(&(this->connection)) << endl;
@@ -112,6 +125,8 @@ bool MyDB::selectSQL(string sql)
 
 bool MyDB::executeSQL(string opType, string sql)
 {
+	// 调用mysql_query前最好先mysql_ping一下，以防断掉的连接重连回来
+	mysql_ping(&(this->connection));
 	if (mysql_query(&(this->connection), sql.c_str()))
 	{
 		cout << "Error: " << mysql_error(&(this->connection)) << endl;

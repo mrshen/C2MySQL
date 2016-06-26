@@ -2,8 +2,6 @@
 #include "c2mysql.h"
 using namespace std;
 
-#define IS_DEBUG 1
-
 int main()
 {
 	string sql;
@@ -30,11 +28,13 @@ int main()
 				db.selectSQL(sql);
 				break;
 			case 3:
+				cout << "update sql> ";
 				getchar();
 				getline(cin, sql);
 				db.updateSQL(sql);
 				break;
 			case 4:
+				cout << "delete sql> ";
 				getchar();
 				getline(cin, sql);
 				db.deleteSQL(sql);
